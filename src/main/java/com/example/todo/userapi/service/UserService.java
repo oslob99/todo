@@ -1,5 +1,6 @@
 package com.example.todo.userapi.service;
 
+import com.example.todo.userapi.dto.request.LoginRequestDTO;
 import com.example.todo.userapi.dto.request.UserRequestSignUpDTO;
 import com.example.todo.userapi.dto.response.UserSignUpResponseDTO;
 import com.example.todo.userapi.entity.User;
@@ -27,6 +28,8 @@ public class UserService {
         }
         String email = dto.getEmail();
 
+//        if (){}
+
         if (userRepository.existsByEmail(email)){
             log.warn("이메일이 중복되었습니다. - {}",email);
             throw new RuntimeException("가입정보가 없습니다");
@@ -47,6 +50,28 @@ public class UserService {
     }
 
 
+    public boolean isDuplicate(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    // 회원 인증
+    public void authenticate(final LoginRequestDTO dto){
+
+        // 이메일을 통해 회원 정보 조회
+        User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(
+                () -> new RuntimeException("가입된 회원이 아닙니다!")
+        );
+
+        // 패스워드 검증
+        String rawPassword = dto.getPassword(); // 입력 비번
+        String encodedPassword = user.getPassword(); // DB에 저장된 비번
+        if (!encoder.matches(rawPassword,encodedPassword)){
+            throw new RuntimeException("비밀번호가 틀렸습니다");
+        }
+
+        log.info("{}님 로그인 성공!!",user.getUserName());
+
+    }
 
 
 }
