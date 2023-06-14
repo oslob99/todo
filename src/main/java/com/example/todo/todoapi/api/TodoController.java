@@ -40,11 +40,16 @@ public class TodoController {
         }
 
         try {
-            TodoListResponseDTO responseDTO = todoService.create(requestDTO,userInfo.getUserId());
+            TodoListResponseDTO responseDTO = todoService.create(requestDTO,userInfo);
             return ResponseEntity
                     .ok()
                     .body(responseDTO);
-        } catch (RuntimeException e) {
+        }catch (IllegalStateException e){
+            // 권한때문에 발생한 예외
+            log.warn("인가되지 않은 회원");
+            return ResponseEntity.status(401).build();
+        }
+        catch (RuntimeException e) {
             log.error(e.getMessage());
             return ResponseEntity
                     .internalServerError()
